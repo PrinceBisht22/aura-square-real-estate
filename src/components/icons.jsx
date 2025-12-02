@@ -1,4 +1,4 @@
-// src/components/icons.jsx (FINAL SYNTAX-CORRECTED VERSION)
+// src/components/icons.jsx
 import React from 'react';
 
 // Helper to keep icons consistent
@@ -17,8 +17,7 @@ const base = (d) => (props) => (
   </svg>
 );
 
-export const ICONS = {
-  
+const ICONS = {
   // --- ADDED MISSING ICONS & FIXED SYNTAX ---
   Google: base(
     <>
@@ -28,6 +27,7 @@ export const ICONS = {
       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
     </>
   ),
+
   AlertCircle: base(
     <>
       <circle cx="12" cy="12" r="10" />
@@ -35,7 +35,7 @@ export const ICONS = {
       <line x1="12" y1="16" x2="12.01" y2="16" />
     </>
   ),
-  
+
   // --- EXISTING ICONS (SYNTAX CORRECTED) ---
   Compass: base(
     <>
@@ -89,9 +89,7 @@ export const ICONS = {
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </>
   ),
-  ArrowLeft: base(
-    <path d="M19 12H5m7 7-7-7 7-7" />
-  ),
+  ArrowLeft: base(<path d="M19 12H5m7 7-7-7 7-7" />),
   ArrowRight: base(
     <>
       <path d="M5 12h14" />
@@ -377,21 +375,10 @@ export const ICONS = {
       <polyline points="13 2 13 9 20 9" />
     </>
   ),
-  AlertCircle: base(
-    <>
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </>
-  ),
-  
+
   // --- ICONS FOR FOOTER (Socials) ---
-  Facebook: base(
-    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-  ),
-  Twitter: base(
-    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-12.7 12.5S1.2 13 5.3 11c-1.2-.5-2.1-1.8-2.1-2.8 0 0 1 .7 2.3 1.3-1.5-1.7-2.5-5.2-.2-7.7 2.5 2.9 6 4.7 9.9 4.8-.5-3.9 4.3-6.1 7.1-3.2 1.4-.3 2.7-.8 3.9-1.5-.5 1.3-1.4 2.4-2.5 3 1.2-.2 2.3-.6 3.3-1.2z" />
-  ),
+  Facebook: base(<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />),
+  Twitter: base(<path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-12.7 12.5S1.2 13 5.3 11c-1.2-.5-2.1-1.8-2.1-2.8 0 0 1 .7 2.3 1.3-1.5-1.7-2.5-5.2-.2-7.7 2.5 2.9 6 4.7 9.9 4.8-.5-3.9 4.3-6.1 7.1-3.2 1.4-.3 2.7-.8 3.9-1.5-.5 1.3-1.4 2.4-2.5 3 1.2-.2 2.3-.6 3.3-1.2z" />),
   Instagram: base(
     <>
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
@@ -429,4 +416,5 @@ export const ICONS = {
   ),
 };
 
-export const ICONS = { ...ICONS }; // Re-exporting the ICONS object correctly.
+export { ICONS };
+export default ICONS;
