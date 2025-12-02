@@ -3,8 +3,11 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ICONS } from '../components/icons.jsx';
 
+// REMOVED: import { saveUserSession } from '../utils/auth.js';
 // 💡 NEW: Import the useAuth hook (replaces old auth and session managers)
 import { useAuth } from '../context/AuthContext'; 
+// NOTE: Assuming handleOAuthSignup is either removed or refactored elsewhere, 
+// as its logic is now contained within useAuth's googleLogin.
 
 const LoginPage = () => {
   const { login, googleLogin, loading: authLoading } = useAuth(); // Get auth functions
@@ -46,7 +49,8 @@ const LoginPage = () => {
         await googleLogin();
         navigate('/profile');
     } catch (err) {
-        setError('Failed to log in with Google.');
+        // Handle failure, often when popup is closed
+        setError('Failed to log in with Google. Ensure popups are allowed.');
         console.error(err);
     } finally {
         setIsSubmitting(false);
