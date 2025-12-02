@@ -1,7 +1,11 @@
+// src/components/profile/MessagesTab.jsx (Firebase Integrated)
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ICONS } from '../icons.jsx';
-import { messageAPI, listingAPI } from '../../utils/api-endpoints.js';
+// 💡 NEW: Import universal API functions
+import { fetchCollectionData, updateListingStatus } from '../../utils/api.js'; 
+// We reuse updateListingStatus to mark a message as read in Firestore by updating its status.
+// REMOVED: import { messageAPI, listingAPI } from '../../utils/api-endpoints.js';
 
 const MessagesTab = ({ user }) => {
   const [messages, setMessages] = useState([]);
@@ -13,10 +17,29 @@ const MessagesTab = ({ user }) => {
   }, [user.id]);
 
   const loadMessages = async () => {
+    const userId = user.id || user.uid;
+    if (!userId) {
+        setLoading(false);
+        return;
+    }
+    
     try {
       setLoading(true);
-      const data = await messageAPI.getMessages();
-      setMessages(data);
+      // 💡 NEW: Fetch messages from the 'contactSubmissions' collection.
+      // We assume user messages are inquiries directed at the user's listings 
+      // or contact forms submitted to the user's email.
+      const data = await fetchCollectionData('contactSubmissions', [
+          ['ownerId', '==', userId] // Assuming you save the ownerId of the listing/profile
+      ]);
+      
+      // Sort: unread first, then by creation date
+      const sortedMessages = data.sort((a, b) => {
+          if (a.read === false && b.read === true) return -1;
+          if (a.read === true && b.read === false) return 1;
+          return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      setMessages(sortedMessages);
     } catch (error) {
       console.error('Failed to load messages:', error);
     } finally {
@@ -26,7 +49,8 @@ const MessagesTab = ({ user }) => {
 
   const handleMarkAsRead = async (messageId) => {
     try {
-      await messageAPI.markAsRead(messageId);
+      // 💡 REUSED: updateListingStatus to update the message's status to 'read'
+      await updateListingStatus(messageId, { read: true }, 'contactSubmissions');
       loadMessages();
     } catch (error) {
       console.error('Failed to mark as read:', error);
@@ -73,7 +97,7 @@ const MessagesTab = ({ user }) => {
                 }`}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <p className="font-semibold text-navy">{message.subject || 'Inquiry'}</p>
+                  <p className="font-semibold text-navy">{message.subject || `Inquiry for Listing ${message.listingId?.slice(0, 8) || ''}`}</p>
                   {!message.read && (
                     <span className="h-2 w-2 rounded-full bg-navy"></span>
                   )}
@@ -100,7 +124,7 @@ const MessagesTab = ({ user }) => {
                 <div>
                   <p className="text-xs text-slate mb-1">From</p>
                   <p className="text-sm font-medium text-navy">
-                    {selectedMessage.fromUserEmail || 'Anonymous'}
+                    {selectedMessage.fromUserEmail || selectedMessage.email || 'Anonymous'}
                   </p>
                 </div>
                 <div>
@@ -131,4 +155,3 @@ const MessagesTab = ({ user }) => {
 };
 
 export default MessagesTab;
-
