@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { ICONS } from '../icons.jsx';
 // 💡 NEW: Import universal API functions
 import { fetchCollectionData, updateListingStatus } from '../../utils/api.js'; 
-// We reuse updateListingStatus to mark a message as read in Firestore by updating its status.
 // REMOVED: import { messageAPI, listingAPI } from '../../utils/api-endpoints.js';
 
 const MessagesTab = ({ user }) => {
@@ -26,8 +25,6 @@ const MessagesTab = ({ user }) => {
     try {
       setLoading(true);
       // 💡 NEW: Fetch messages from the 'contactSubmissions' collection.
-      // We assume user messages are inquiries directed at the user's listings 
-      // or contact forms submitted to the user's email.
       const data = await fetchCollectionData('contactSubmissions', [
           ['ownerId', '==', userId] // Assuming you save the ownerId of the listing/profile
       ]);
@@ -50,7 +47,8 @@ const MessagesTab = ({ user }) => {
   const handleMarkAsRead = async (messageId) => {
     try {
       // 💡 REUSED: updateListingStatus to update the message's status to 'read'
-      await updateListingStatus(messageId, { read: true }, 'contactSubmissions');
+      // NOTE: This assumes updateListingStatus can be used for any collection (like contactSubmissions)
+      await updateListingStatus(messageId, { read: true }, 'contactSubmissions'); 
       loadMessages();
     } catch (error) {
       console.error('Failed to mark as read:', error);

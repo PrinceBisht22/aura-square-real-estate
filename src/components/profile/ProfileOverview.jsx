@@ -6,9 +6,8 @@ import { ICONS } from '../icons.jsx';
 import { 
   getMyListings, 
   getFavoriteIds, 
-  fetchCollectionData // Generic fetch for messages
+  fetchCollectionData 
 } from '../../utils/api.js'; 
-// REMOVED: import { listingAPI, favoriteAPI, messageAPI } from '../../utils/api-endpoints.js';
 
 
 const ProfileOverview = ({ user }) => {
@@ -33,9 +32,9 @@ const ProfileOverview = ({ user }) => {
       try {
         // 1. Fetch all user-specific data concurrently
         const [listings, favoriteIds, messages] = await Promise.all([
-            getMyListings(userId),              // Gets all user's listings
-            getFavoriteIds(userId),             // Gets user's favorite IDs array
-            fetchCollectionData('messages', [['recipientId', '==', userId]]) // Placeholder for fetching messages sent to user
+            getMyListings(userId),              
+            getFavoriteIds(userId),             
+            fetchCollectionData('contactSubmissions', [['ownerId', '==', userId]]) 
         ]);
 
         // 2. Calculate statistics
@@ -59,7 +58,7 @@ const ProfileOverview = ({ user }) => {
     };
 
     loadStats();
-  }, [user.id, user.uid]); // Depend on user IDs for refetch
+  }, [user.id, user.uid]); 
 
   if (loading) {
     const Loader = ICONS?.Loader;
