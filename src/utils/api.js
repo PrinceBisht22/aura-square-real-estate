@@ -12,7 +12,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // --- UTILITY: Generic Data Fetching Functions ---
 
-const fetchCollectionData = async (collectionName, filters = []) => {
+export const fetchCollectionData = async (collectionName, filters = []) => {
   let colRef = collection(db, collectionName);
   let q = colRef;
   
