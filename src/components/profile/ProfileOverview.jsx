@@ -1,6 +1,15 @@
+// src/components/profile/ProfileOverview.jsx (Firebase Integrated)
 import React, { useState, useEffect } from 'react';
 import { ICONS } from '../icons.jsx';
-import { listingAPI, favoriteAPI, messageAPI } from '../../utils/api-endpoints.js';
+
+// 💡 NEW: Import Firebase API functions
+import { 
+  getMyListings, 
+  getFavoriteIds, 
+  fetchCollectionData // Generic fetch for messages
+} from '../../utils/api.js'; 
+// REMOVED: import { listingAPI, favoriteAPI, messageAPI } from '../../utils/api-endpoints.js';
+
 
 const ProfileOverview = ({ user }) => {
   const [stats, setStats] = useState({
@@ -15,12 +24,21 @@ const ProfileOverview = ({ user }) => {
 
   useEffect(() => {
     const loadStats = async () => {
+      const userId = user.id || user.uid;
+      if (!userId) {
+          setLoading(false);
+          return;
+      }
+      
       try {
-        // Mock data fallback if APIs fail or return undefined
-        const listings = await listingAPI.getListings({ ownerId: user.id }).catch(() => []) || [];
-        const favorites = await favoriteAPI.getFavorites().catch(() => []) || [];
-        const messages = await messageAPI.getMessages().catch(() => []) || [];
+        // 1. Fetch all user-specific data concurrently
+        const [listings, favoriteIds, messages] = await Promise.all([
+            getMyListings(userId),              // Gets all user's listings
+            getFavoriteIds(userId),             // Gets user's favorite IDs array
+            fetchCollectionData('messages', [['recipientId', '==', userId]]) // Placeholder for fetching messages sent to user
+        ]);
 
+        // 2. Calculate statistics
         const published = listings.filter((l) => l.status === 'published').length;
         const totalViews = listings.reduce((sum, l) => sum + (l.views || 0), 0);
         const totalLeads = listings.reduce((sum, l) => sum + (l.leads || 0), 0);
@@ -28,7 +46,7 @@ const ProfileOverview = ({ user }) => {
         setStats({
           listings: listings.length,
           published,
-          favorites: favorites.length,
+          favorites: favoriteIds.length,
           messages: messages.length,
           views: totalViews,
           leads: totalLeads,
@@ -41,7 +59,7 @@ const ProfileOverview = ({ user }) => {
     };
 
     loadStats();
-  }, [user.id]);
+  }, [user.id, user.uid]); // Depend on user IDs for refetch
 
   if (loading) {
     const Loader = ICONS?.Loader;
@@ -53,7 +71,6 @@ const ProfileOverview = ({ user }) => {
     );
   }
 
-  // Use optional chaining (ICONS?.Name) to prevent crash during array creation
   const statCards = [
     { label: 'Total Listings', value: stats.listings, icon: ICONS?.Home, color: 'bg-blue-50 text-blue-600' },
     { label: 'Published', value: stats.published, icon: ICONS?.Check, color: 'bg-green-50 text-green-600' },
@@ -76,7 +93,6 @@ const ProfileOverview = ({ user }) => {
           return (
             <div key={stat.label} className="rounded-2xl bg-white border border-gray-200 p-6">
               <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${stat.color} mb-4`}>
-                {/* FIX IS HERE: Check if Icon exists before rendering */}
                 {Icon ? <Icon className="h-6 w-6" /> : <span className="text-xl font-bold">#</span>}
               </div>
               <p className="text-2xl font-display font-semibold text-navy mb-1">{stat.value}</p>
