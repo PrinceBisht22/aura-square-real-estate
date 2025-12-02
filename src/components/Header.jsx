@@ -1,11 +1,14 @@
-// src/components/Header.jsx
+// src/components/Header.jsx (Firebase Integrated)
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import MegaMenuPortal from './MegaMenuPortal.jsx';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ICONS } from './icons.jsx';
-import { getUserSession, clearUserSession, isAuthenticated } from '../utils/auth.js';
+// REMOVED: import { getUserSession, clearUserSession, isAuthenticated } from '../utils/auth.js';
+// 💡 NEW: Import the useAuth hook
+import { useAuth } from '../context/AuthContext';
+
 
 const navLinks = [
   { name: 'Buy', to: '/buy', hasMegaMenu: true, key: 'buy' },
@@ -17,9 +20,12 @@ const navLinks = [
 ];
 
 const Header = () => {
+  // 💡 NEW: Use the Firebase Auth state from context
+  const { currentUser, logout, loading: authLoading } = useAuth();
+  
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState(null);
-  const [user, setUser] = useState(null);
+  // Removed: [user, setUser] state, using currentUser directly
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
@@ -29,11 +35,7 @@ const Header = () => {
   const userMenuTimer = useRef(null);
   const navItemRefs = useRef({});
 
-  useEffect(() => {
-    if (isAuthenticated()) {
-      setUser(getUserSession());
-    }
-  }, []);
+  // Removed: useEffect to check isAuthenticated and getUserSession
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -76,18 +78,25 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    clearUserSession();
-    if (typeof localStorage !== 'undefined') localStorage.removeItem('user');
-    setUser(null);
+    // 💡 Use the Firebase logout function from context
+    logout();
+    // Removed: clearUserSession() and localStorage.removeItem('user')
     setShowUserMenu(false);
     navigate('/');
-    setTimeout(() => window.location.reload(), 50);
+    // Added a small timeout just for UI cleanup, Firebase context updates state automatically
+    // setTimeout(() => window.location.reload(), 50); 
   };
 
   const closeMobileMenu = () => {
     setMenuOpen(false);
     setActiveMegaMenu(null);
   };
+
+  // Derived state from currentUser
+  const userIsLoggedIn = !!currentUser;
+  const userIsAdmin = currentUser?.role === 'admin';
+  const userDisplayName = currentUser?.name || currentUser?.displayName || currentUser?.email?.split('@')[0] || 'Profile';
+
 
   return (
     <>
@@ -174,8 +183,11 @@ const Header = () => {
             <NavLink to="/post-property" className="rounded-full bg-gradient-to-r from-navy to-indigo px-4 xl:px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5 whitespace-nowrap">
               Post Property
             </NavLink>
-
-            {user ? (
+            
+            {/* User Status Block */}
+            {authLoading ? (
+              <div className="text-sm text-slate">Loading...</div>
+            ) : userIsLoggedIn ? (
               <div 
                 className="relative"
                 onMouseEnter={handleUserEnter}
@@ -184,14 +196,14 @@ const Header = () => {
                 <button
                   className="flex items-center gap-2 rounded-full border border-slate/20 px-3 py-2 hover:bg-slate/5 transition"
                 >
-                  {user.picture ? (
-                    <img src={user.picture} alt={user.name} className="h-8 w-8 rounded-full" />
+                  {currentUser?.photoURL ? (
+                    <img src={currentUser.photoURL} alt={userDisplayName} className="h-8 w-8 rounded-full" />
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-gradient-to-r from-navy to-indigo flex items-center justify-center text-white text-sm font-semibold">
-                      {user.name?.charAt(0).toUpperCase() || 'U'}
+                      {userDisplayName?.charAt(0).toUpperCase() || 'U'}
                     </div>
                   )}
-                  <span className="text-sm font-semibold text-navy hidden xl:inline">{user.name}</span>
+                  <span className="text-sm font-semibold text-navy hidden xl:inline">{userDisplayName}</span>
                   <ICONS.ChevronDown className="h-4 w-4 text-slate" />
                 </button>
                 
@@ -207,17 +219,17 @@ const Header = () => {
                     >
                         <div className="rounded-2xl bg-white border border-gray-200 shadow-xl py-2">
                           <div className="px-4 py-3 border-b border-gray-100">
-                            <p className="text-sm font-semibold text-navy">{user?.name}</p>
-                            <p className="text-xs text-slate">{user?.email}</p>
-                            {user?.role && (
+                            <p className="text-sm font-semibold text-navy">{userDisplayName}</p>
+                            <p className="text-xs text-slate">{currentUser?.email}</p>
+                            {currentUser?.role && (
                               <span className="inline-block mt-1 px-2 py-0.5 text-xs font-semibold rounded-full bg-navy/10 text-navy">
-                                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                {currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1)}
                               </span>
                             )}
                           </div>
 
                           <Link to="/profile" className="block px-4 py-2 text-sm text-navy hover:bg-gray-50" onClick={() => setShowUserMenu(false)}>Profile</Link>
-                          {user?.role === 'admin' && (
+                          {userIsAdmin && (
                             <Link to="/admin" className="block px-4 py-2 text-sm text-navy hover:bg-gray-50" onClick={() => setShowUserMenu(false)}>
                               Admin Panel
                             </Link>
@@ -325,11 +337,15 @@ const Header = () => {
 
                     <div className="sticky bottom-0 border-t border-gray-200 bg-white px-6 py-6 space-y-3" style={{ zIndex: 10 }}>
                       <NavLink to="/post-property" onClick={closeMobileMenu} className="block w-full rounded-full bg-gradient-to-r from-navy to-indigo px-6 py-3.5 text-center text-sm font-semibold text-white shadow-lg transition hover:shadow-xl">Post Property</NavLink>
-                      {user ? (
+                      
+                      {/* Mobile User Status Block */}
+                      {authLoading ? (
+                        <div className="text-center text-sm text-slate py-3">Loading user...</div>
+                      ) : userIsLoggedIn ? (
                         <div className="space-y-3">
                           <div className="px-4 py-3 bg-gray-50 rounded-xl">
-                            <p className="text-sm font-semibold text-navy">{user.name}</p>
-                            <p className="text-xs text-slate">{user.email}</p>
+                            <p className="text-sm font-semibold text-navy">{userDisplayName}</p>
+                            <p className="text-xs text-slate">{currentUser?.email}</p>
                           </div>
                           <button
                             type="button"
@@ -374,7 +390,7 @@ const MobileNavItem = ({ link, onClose }) => {
           </button>
           <AnimatePresence>
             {isOpen && (
-              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="pl-4 pr-4 pb-3 space-y-2 overflow-hidden">
                 <div className="pl-4 pr-4 pb-3 space-y-2">
                   <NavLink to={link.to} onClick={onClose} className="block px-4 py-2.5 text-sm text-slate rounded-lg hover:bg-slate/5 hover:text-navy transition">View All {link.name}</NavLink>
                 </div>
