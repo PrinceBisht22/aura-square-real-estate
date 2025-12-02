@@ -18,7 +18,8 @@ const base = (d) => (props) => (
 );
 
 export const ICONS = {
-  // --- ADDED MISSING ICONS ---
+  
+  // --- ADDED MISSING ICONS & FIXED SYNTAX ---
   Google: base(
     <>
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -71,8 +72,8 @@ export const ICONS = {
     <>
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" /> {/* Fixed x2="13" to y2="13" */}
-      <line x1="16" y1="17" x2="8" y2="17" /> {/* Fixed x2="17" to y2="17" */}
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
       <polyline points="10 9 9 9 8 9" />
     </>
   ),
@@ -427,3 +428,5 @@ export const ICONS = {
     </>
   ),
 };
+
+export const ICONS = { ...ICONS }; // Re-exporting the ICONS object correctly.
