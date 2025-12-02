@@ -1,4 +1,4 @@
-// src/utils/api.js (FINAL COMPREHENSIVE VERSION - INCLUDING DEALER VERIFICATION)
+// src/utils/api.js (FINAL COMPREHENSIVE VERSION - EXPORT FIX APPLIED)
 
 import { db, auth, storage } from "./firebaseConfig";
 import { 
@@ -171,6 +171,24 @@ export const submitReview = async (formData, userId, userName) => {
 };
 
 // --- FILE UPLOAD TO STORAGE ---
+
+export const uploadAvatarAndGetUrl = async (userId, file) => { // 💡 FIXED: Export added
+    if (!userId || !file) throw new Error("User ID and file are required for avatar upload.");
+    
+    // Path: avatars/{userId}/avatar_timestamp.jpg
+    const storageRef = ref(
+        storage, 
+        `avatars/${userId}/avatar_${Date.now()}_${file.name}`
+    );
+    
+    // Upload file
+    await uploadBytes(storageRef, file);
+    
+    // Get public URL
+    const avatarUrl = await getDownloadURL(storageRef);
+    
+    return avatarUrl;
+};
 
 const uploadListingImages = async (photos, userId, listingId) => {
     const urls = [];
