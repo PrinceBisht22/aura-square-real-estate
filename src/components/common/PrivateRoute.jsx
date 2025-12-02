@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom'; // Assuming react-router-dom v6+
-import { useAuth } from '../context/AuthContext'; // Adjust path based on where you put it
+import { useAuth } from '../../context/AuthContext'; // Adjust path based on where you put it
 
 // A component to protect routes
 const PrivateRoute = () => {
