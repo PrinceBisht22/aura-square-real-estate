@@ -1,0 +1,149 @@
+@import './styles/design-tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+  }
+
+  #root {
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .site-container {
+    @apply mx-auto w-full max-w-screen-xl px-4 sm:px-6 lg:px-10;
+  }
+
+  .section-heading {
+    @apply text-3xl md:text-4xl font-display font-semibold text-navy tracking-tight;
+  }
+
+  .section-subtitle {
+    @apply text-base md:text-lg text-slate max-w-2xl;
+  }
+
+  .floating-chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/80 px-4 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600;
+  }
+
+  .property-card {
+    @apply transition-transform duration-300;
+    @apply flex flex-col;
+  }
+
+  .property-card .card-image {
+    height: 18rem;
+  }
+
+  @screen md {
+    .property-card .card-image {
+      height: 20rem;
+    }
+  }
+
+  @screen lg {
+    .property-card .card-image {
+      height: 22rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .property-card .card-image {
+      height: 16rem;
+    }
+  }
+
+  /* Consistent card button sizing */
+  .property-card .view-details-btn {
+    min-width: 140px;
+    height: 44px;
+    padding: 0.875rem 2rem;
+  }
+
+  .thumbnails-swiper {
+    padding: 0.5rem 0;
+  }
+
+  .thumbnails-swiper .swiper-slide {
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+
+  .thumbnails-swiper .swiper-slide-thumb-active {
+    opacity: 1;
+  }
+
+  /* Animation utilities */
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  .slide-up {
+    animation: slideUp 0.6s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  #dropdown-portal {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0;               /* don't change layout */
+    z-index: 99999 !important;
+    pointer-events: none;
+  }
+
+  /* Portal children (actual menus) accept pointer events */
+  #dropdown-portal > * {
+    pointer-events: auto;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    z-index: 99999;
+  }
+
+  /* Header inner grid override to pin edges and center nav */
+  .header-inner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    max-width: 1280px; /* match site width */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}

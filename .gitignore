@@ -1,0 +1,14 @@
+# Dependencies
+/node_modules
+
+# Build output
+/dist
+/build
+
+# Firebase and Local Environment Secrets
+.env
+.env.local
+firebase-debug.log
+
+# VS Code files
+.vscode/
