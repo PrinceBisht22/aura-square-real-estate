@@ -1,8 +1,8 @@
-// src/utils/api.js (FINAL COMPREHENSIVE VERSION)
+// src/utils/api.js (FINAL COMPREHENSIVE VERSION - INCLUDING DEALER VERIFICATION)
 
 import { db, auth, storage } from "./firebaseConfig";
 import { 
-  doc, getDoc, updateDoc, collection, addDoc, 
+  doc, getDoc, updateDoc, collection, addDoc, setDoc, // Added setDoc for dealerVerification
   query, where, getDocs, deleteDoc, arrayUnion, arrayRemove
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -87,7 +87,6 @@ export const getMyListings = async (uid) => {
 export const updateListingStatus = async (listingId, data) => {
   try {
     const listingRef = doc(db, "listings", listingId);
-    // Allows updating status, featured, or any other field passed in 'data'
     await updateDoc(listingRef, data); 
     return { success: true };
   } catch (error) {
@@ -161,7 +160,7 @@ export const submitReview = async (formData, userId, userName) => {
       user: userName,
       date: new Date().toISOString(),
       status: 'pending', 
-      rating: Number(formData.rating) // Ensure rating is a number
+      rating: Number(formData.rating) 
     };
     await addDoc(collection(db, "reviews"), reviewData);
     return { success: true, message: 'Review submitted successfully! Pending approval.' };
@@ -189,6 +188,37 @@ const uploadListingImages = async (photos, userId, listingId) => {
         urls.push({ url, fileName: file.name });
     }
     return urls;
+};
+
+// --- DEALER VERIFICATION DOCUMENTS (NEW FOR DEALER TAB) ---
+
+export const submitDealerVerificationDocuments = async (userId, files) => {
+  if (!userId) throw new Error("User ID required for verification.");
+
+  try {
+      // 1. Upload Documents to Storage (using a separate path from listings)
+      const documentUrls = [];
+      for (const file of files) {
+        const storageRef = ref(storage, `dealer_verifications/${userId}/${file.name}_${Date.now()}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        documentUrls.push({ name: file.name, url: url });
+      }
+
+      // 2. Update Firestore Status in 'dealerVerifications' collection
+      const docRef = doc(db, 'dealerVerifications', userId);
+      await setDoc(docRef, {
+        status: 'pending',
+        submittedAt: new Date().toISOString(),
+        documents: documentUrls,
+        reviewedBy: null,
+      }, { merge: true });
+
+      return { success: true };
+  } catch (error) {
+      console.error("Failed to submit verification documents:", error);
+      throw new Error('Failed to submit verification documents. Check file sizes.');
+  }
 };
 
 // --- FORM SUBMISSION & POSTING ---
