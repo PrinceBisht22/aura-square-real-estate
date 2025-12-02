@@ -2,7 +2,7 @@
 
 import { db, auth, storage } from "./firebaseConfig";
 import { 
-  doc, getDoc, updateDoc, collection, addDoc, setDoc, // Added setDoc for dealerVerification
+  doc, getDoc, updateDoc, collection, addDoc, setDoc, 
   query, where, getDocs, deleteDoc, arrayUnion, arrayRemove
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
